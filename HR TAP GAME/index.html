@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://telegram.org"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', function() {
+    var tg = window.Telegram.WebApp;
+    tg.expand();
+    if (!tg.initData || tg.initData === "") {
+      document.body.innerHTML = "<div style='text-align:center; margin-top:20%; font-family:sans-serif;'><h2>Ye game sirf Telegram par chalega!</h2><p>Kripya ise Telegram app ke andar open karein.</p></div>";
+    }
+  });
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H.R COIN Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at top, #1b2735 0%, #090a0f 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 35px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+        }
+        .coin-label {
+            font-size: 14px;
+            color: #aaa;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .score-box {
+            font-size: 38px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-top: 5px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        .multiplier-badge {
+            font-size: 12px;
+            background: #ff4757;
+            padding: 3px 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .coin-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #hr-coin {
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffe600, #ff9900, #b35900);
+            border: 8px solid #ffd700;
+            box-shadow: 0 0 45px rgba(255, 180, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.08s ease;
+        }
+        #hr-coin:active {
+            transform: scale(0.93);
+        }
+        .coin-title {
+            font-size: 46px;
+            font-weight: 900;
+            color: #3d1c00;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+        .coin-sub {
+            font-size: 18px;
+            font-weight: bold;
+            color: #5c2b00;
+            letter-spacing: 4px;
+        }
+        .floating-text {
+            position: absolute;
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 0.8s ease-out forwards;
+            text-shadow: 0 0 10px #ffd700;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-90px); }
+        }
+        .bottom-panel {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .energy-bar-box {
+            text-align: center;
+            font-size: 16px;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        .boost-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .boost-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 5px;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+        }
+        .boost-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+        .boost-icon {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .boost-name {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .boost-tag {
+            font-size: 10px;
+            color: #ffd700;
+            display: block;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="coin-label">Total H.R Coins</div>
+        <div class="score-box">🪙 <span id="score">0</span></div>
+        <div class="multiplier-badge">Tap Power: +<span id="tap-power">1</span></div>
+    </div>
+
+    <div class="coin-container" id="coin-area">
+        <div id="hr-coin" onclick="handleTap(event)">
+            <span class="coin-title">H.R</span>
+            <span class="coin-sub">COIN</span>
+        </div>
+    </div>
+
+    <div class="bottom-panel">
+        <div class="energy-bar-box">⚡ Energy: <span id="energy">500</span> / 500</div>
+        
+        <div class="boost-grid">
+            <button class="boost-btn" onclick="triggerBoost('energy')">
+                <span class="boost-icon">⚡</span>
+                <span class="boost-name">Full Energy</span>
+                <span class="boost-tag">Watch Ad</span>
+            </button>
+
+            <button class="boost-btn" onclick="triggerBoost('double')">
+                <span class="boost-icon">🚀</span>
+                <span class="boost-name">2x Tap (30s)</span>
+                <span class="boost-tag">Watch Ad</span>
+            </button>
+
+            <button class="boost-btn" onclick="triggerBoost('bonus')">
+                <span class="boost-icon">🎁</span>
+                <span class="boost-name">+500 Coins</span>
+                <span class="boost-tag">Watch Ad</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Purane save kiye hue coins aur energy load karein
+        let score = parseInt(localStorage.getItem('hr_coin_score')) || 0;
+        let energy = localStorage.getItem('hr_coin_energy') !== null ? parseInt(localStorage.getItem('hr_coin_energy')) : 500;
+        const maxEnergy = 500;
+        let tapPower = 1;
+
+        // Game khulte hi purana score screen par dikhayein
+        updateUI();
+
+        function saveProgress() {
+            localStorage.setItem('hr_coin_score', score);
+            localStorage.setItem('hr_coin_energy', energy);
+        }
+
+        function handleTap(event) {
+            if (energy >= tapPower) {
+                score += tapPower;
+                energy -= tapPower;
+                saveProgress(); // Har tap par auto-save
+                updateUI();
+                showFloatingText(event.clientX, event.clientY, `+${tapPower}`);
+            } else {
+                alert("Energy khatam ho gayi hai! Niche 'Full Energy' boost use karein.");
+            }
+        }
+
+        function showFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            el.style.left = (x - 20) + 'px';
+            el.style.top = (y - 40) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function updateUI() {
+            document.getElementById('score').innerText = score.toLocaleString();
+            document.getElementById('energy').innerText = energy;
+            document.getElementById('tap-power').innerText = tapPower;
+        }
+
+        function triggerBoost(type) {
+            let confirmAd = confirm("🎬 [AD SPACE] Yahan aapka Ad chalega!\n\nAbhi test karne ke liye 'OK' dabayein aur reward payein.");
+            
+            if (confirmAd) {
+                if (type === 'energy') {
+                    energy = maxEnergy;
+                    alert("⚡ Energy 100% Full ho gayi!");
+                } 
+                else if (type === 'double') {
+                    tapPower = 2;
+                    alert("🚀 2x Tap Power active ho gaya hai 30 seconds ke liye!");
+                    setTimeout(() => {
+                        tapPower = 1;
+                        updateUI();
+                    }, 30000);
+                } 
+                else if (type === 'bonus') {
+                    score += 500;
+                    alert("🎁 Badhai ho! Aapko +500 H.R Coins mile hain!");
+                }
+                saveProgress(); // Boost ke baad bhi auto-save
+                updateUI();
+            }
+        }
+
+        setInterval(() => {
+            if (energy < maxEnergy) {
+                energy = Math.min(maxEnergy, energy + 2);
+                saveProgress();
+                updateUI();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
